@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prospect Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0f0f0f;
+    color: #e0e0e0;
+    font-family: 'Roboto Condensed', sans-serif;
+    min-height: 100vh;
+    padding: 24px;
+  }
+  h1 { font-size: 2rem; font-weight: 400; margin-bottom: 24px; color: #fff; font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.04em; }
+  .card-label { font-size: 0.75rem; color: #888; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.08em; font-family: 'Bebas Neue', sans-serif; }
+  .card-count { font-size: 2.4rem; font-weight: 700; color: #fff; font-family: 'Bebas Neue', sans-serif; }
+
+  /* Chart */
+  .chart-section {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 16px 20px 12px;
+    margin-bottom: 24px;
+  }
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chart-title { font-size: 1rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.08em; font-family: 'Bebas Neue', sans-serif; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; }
+  .leg { font-size: 0.72rem; color: #888; display: flex; align-items: center; gap: 5px; }
+  .leg-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .leg-dot-1 { background: #6ab0ff; }
+  .leg-dot-2 { background: #f0b429; }
+  .leg-dot-3 { background: #ff9f43; }
+  .leg-dot-4 { background: #a29bfe; }
+  .leg-dot-5 { background: #4caf7d; }
+  .leg-dot-6 { background: #ff6b6b; }
+  #chart { width: 100%; }
+
+  /* Chart range controls */
+  .chart-controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .btn-range {
+    background: transparent;
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    color: #555;
+    padding: 4px 10px;
+    font-size: 0.72rem;
+    font-family: 'Roboto Condensed', sans-serif;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+    white-space: nowrap;
+  }
+  .btn-range:hover { border-color: #444; color: #bbb; }
+  .btn-range.active { border-color: #6b9eff; color: #6b9eff; background: rgba(107,158,255,0.08); }
+
+
+  /* Metric cards */
+  .cards { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+  .card {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 16px 20px;
+    min-width: 140px;
+    flex: 1;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .card:hover { border-color: #444; background: #1f1f1f; }
+  .card.active { border-color: #6b9eff; background: #1a2035; }
+  .card.active .card-label { color: #6b9eff; }
+
+  /* Controls */
+  .controls { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  input[type="text"], select {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    color: #e0e0e0;
+    padding: 8px 12px;
+    font-size: 0.875rem;
+    outline: none;
+  }
+  input[type="text"] { flex: 1; min-width: 200px; }
+  input[type="text"]::placeholder { color: #555; }
+  input[type="text"]:focus, select:focus { border-color: #444; }
+  select { cursor: pointer; }
+  select option { background: #1a1a1a; }
+
+  /* Checkbox — custom styled */
+  input[type="checkbox"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    border: 1.5px solid #3a3a3a;
+    border-radius: 4px;
+    background: #111;
+    cursor: pointer;
+    position: relative;
+    vertical-align: middle;
+    flex-shrink: 0;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  input[type="checkbox"]:hover { border-color: #555; }
+  input[type="checkbox"]:checked {
+    background: #6b9eff;
+    border-color: #6b9eff;
+  }
+  input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 4px;
+    height: 7px;
+    border: 1.5px solid #fff;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg);
+  }
+  th.check-col, td.check-col { width: 40px; padding: 12px 10px 12px 16px; }
+
+  /* Bulk action bar */
+  .bulk-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .selected-count { font-size: 0.8rem; color: #666; min-width: 90px; }
+  .btn-apply {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    color: #e0e0e0;
+    padding: 7px 14px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: border-color 0.15s, opacity 0.15s;
+  }
+  .btn-apply:hover:not(:disabled) { border-color: #555; }
+  .btn-apply:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; background: #1a1a1a; border-radius: 8px; overflow: hidden; }
+  th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #666;
+    border-bottom: 1px solid #2a2a2a;
+    background: #161616;
+  }
+  td { padding: 12px 16px; border-bottom: 1px solid #1e1e1e; font-size: 0.875rem; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #222; }
+  a { color: #6b9eff; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .niche { color: #888; font-size: 0.8rem; }
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+  }
+  .badge:hover { opacity: 0.8; }
+  .badge-0 { background: #2a2a2a; color: #888; }
+  .badge-1 { background: #1a3a5c; color: #6ab0ff; }
+  .badge-2 { background: #0f2e2c; color: #4ecdc4; }
+  .badge-3 { background: #2d2a1a; color: #f0b429; }
+  .badge-4 { background: #2d1f0e; color: #ff9f43; }
+  .badge-5 { background: #211f3a; color: #a29bfe; }
+  .badge-6 { background: #1a3a2a; color: #4caf7d; }
+  .badge-7 { background: #3a1a1a; color: #ff6b6b; }
+  .num { color: #555; }
+  .empty { text-align: center; padding: 40px; color: #555; }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: #1c1c1c;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 28px 32px;
+    width: 380px;
+    max-width: 92vw;
+    animation: popIn 0.18s ease;
+  }
+  @keyframes popIn {
+    from { transform: scale(0.92); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+  }
+  .modal-title { font-size: 1.4rem; color: #fff; margin-bottom: 10px; font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.05em; }
+  .modal-body { font-size: 0.875rem; color: #888; margin-bottom: 26px; line-height: 1.55; }
+  .modal-body strong { color: #ff6b6b; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .btn-cancel {
+    background: #222;
+    border: 1px solid #333;
+    border-radius: 6px;
+    color: #aaa;
+    padding: 8px 18px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .btn-cancel:hover { border-color: #555; color: #eee; }
+  .btn-confirm-danger {
+    background: #3a1010;
+    border: 1px solid #ff6b6b;
+    border-radius: 6px;
+    color: #ff6b6b;
+    padding: 8px 18px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-confirm-danger:hover { background: #4e1515; }
+</style>
+</head>
+<body>
+
+<h1>Prospect Dashboard</h1>
+
+<div class="chart-section">
+  <div class="chart-header">
+    <span class="chart-title" id="chartTitle">Atividade — últimos 30 dias</span>
+    <div class="chart-controls">
+      <button class="btn-range btn-preset" id="preset-7"  onclick="setPreset(7)">7 dias</button>
+      <button class="btn-range btn-preset" id="preset-15" onclick="setPreset(15)">15 dias</button>
+      <button class="btn-range btn-preset active" id="preset-30" onclick="setPreset(30)">30 dias</button>
+    </div>
+  </div>
+  <div class="legend" style="margin-bottom:10px;">
+    <span class="leg"><span class="leg-dot leg-dot-1"></span>Segui</span>
+    <span class="leg"><span class="leg-dot leg-dot-2"></span>Engajamento</span>
+    <span class="leg"><span class="leg-dot leg-dot-3"></span>1° contato DM</span>
+    <span class="leg"><span class="leg-dot leg-dot-4"></span>Conversando DM</span>
+    <span class="leg"><span class="leg-dot leg-dot-5"></span>Convertido</span>
+    <span class="leg"><span class="leg-dot leg-dot-6"></span>Perdido</span>
+  </div>
+  <div id="chart"></div>
+</div>
+
+<div class="cards" id="cards"></div>
+
+<div class="controls">
+  <input type="text" id="search" placeholder="Buscar por handle ou nicho…">
+  <select id="statusFilter">
+    <option value="">Todos os status</option>
+    <option value="0">Not started</option>
+    <option value="1">Segui</option>
+    <option value="2">Engajamento</option>
+    <option value="3">1° contato DM</option>
+    <option value="4">Conversando DM</option>
+    <option value="5">Convertido</option>
+    <option value="6">Perdido</option>
+  </select>
+</div>
+
+<div class="bulk-bar">
+  <select id="bulkAction">
+    <option value="">Ação em massa</option>
+    <option value="open">Abrir perfis</option>
+    <option disabled>── Mudar status ──</option>
+    <option value="status-0">→ Not started</option>
+    <option value="status-1">→ Segui</option>
+    <option value="status-2">→ Engajamento</option>
+    <option value="status-3">→ 1° contato DM</option>
+    <option value="status-4">→ Conversando DM</option>
+    <option value="status-5">→ Convertido</option>
+    <option value="status-6">→ Perdido</option>
+    <option disabled>──────────────</option>
+    <option value="remove">Remover</option>
+  </select>
+  <button class="btn-apply" id="btnApply" onclick="applyBulkAction()" disabled>Aplicar</button>
+  <span class="selected-count" id="selectedCount"></span>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th class="check-col"><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this.checked)"></th>
+      <th>#</th>
+      <th>Handle</th>
+      <th>Nicho</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+
+<!-- Confirmation modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-title">Remover prospects</div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="hideModal()">Cancelar</button>
+      <button class="btn-confirm-danger" onclick="confirmRemove()">Sim, remover</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STAGES      = ['Not started', 'Segui', 'Engajamento', '1° contato DM', 'Conversando DM', 'Convertido', 'Perdido'];
+const STORAGE_KEY = 'prospect_statuses';
+const HISTORY_KEY = 'prospect_history';
+const REMOVED_KEY = 'prospect_removed';
+
+const SERIES = [
+  { key: 'segui',       color: '#6ab0ff', label: 'Segui',          toStatus: 1 },
+  { key: 'engajamento', color: '#f0b429', label: 'Engajamento',    toStatus: 2 },
+  { key: 'contato1',    color: '#ff9f43', label: '1° contato DM',  toStatus: 3 },
+  { key: 'conversando', color: '#a29bfe', label: 'Conversando DM', toStatus: 4 },
+  { key: 'convertido',  color: '#4caf7d', label: 'Convertido',     toStatus: 5 },
+  { key: 'perdido',     color: '#ff6b6b', label: 'Perdido',        toStatus: 6 },
+];
+
+const ALL_PROFILES = [
+  { id: 1,  handle: "@andreanutriaplv",         url: "https://www.instagram.com/andreanutriaplv/",         niche: "Nutrition"   },
+  { id: 2,  handle: "@stellafernandescl",        url: "https://www.instagram.com/stellafernandescl",        niche: ""            },
+  { id: 3,  handle: "@nrfalconi",                url: "https://www.instagram.com/nrfalconi/",               niche: ""            },
+  { id: 4,  handle: "@maitecanteras",            url: "https://www.instagram.com/maitecanteras/",           niche: ""            },
+  { id: 5,  handle: "@danipontierimoreira",      url: "https://www.instagram.com/danipontierimoreira/",     niche: ""            },
+  { id: 6,  handle: "@nutrijessicalino",         url: "https://www.instagram.com/nutrijessicalino",         niche: "Nutrition"   },
+  { id: 7,  handle: "@advpriscilamasselli",      url: "https://www.instagram.com/advpriscilamasselli/",     niche: "Law"         },
+  { id: 8,  handle: "@alexandraludimila11",      url: "https://www.instagram.com/alexandraludimila11",      niche: ""            },
+  { id: 9,  handle: "@veronickaseegmueller",     url: "https://www.instagram.com/veronickaseegmueller/",    niche: ""            },
+  { id: 10, handle: "@caroline.penteado",        url: "https://www.instagram.com/caroline.penteado/",       niche: ""            },
+  { id: 11, handle: "@amarciavale",              url: "https://www.instagram.com/amarciavale/",             niche: ""            },
+  { id: 12, handle: "@marianemariano",           url: "https://www.instagram.com/marianemariano/",          niche: ""            },
+  { id: 13, handle: "@dradeisedaiane",           url: "https://www.instagram.com/dradeisedaiane/",          niche: "Medicine"    },
+  { id: 14, handle: "@gianelorenzettipsicologa", url: "https://www.instagram.com/gianelorenzettipsicologa/",niche: "Psychology"  },
+  { id: 15, handle: "@wendy_mcastro",            url: "https://www.instagram.com/wendy_mcastro/",           niche: ""            },
+  { id: 16, handle: "@elamardegan",              url: "https://www.instagram.com/elamardegan/",             niche: ""            },
+  { id: 17, handle: "@draflaviavicentini",       url: "https://www.instagram.com/draflaviavicentini/",      niche: "Medicine"    },
+  { id: 18, handle: "@fernandacoutinho.catc",    url: "https://www.instagram.com/fernandacoutinho.catc/",   niche: ""            },
+  { id: 19, handle: "@dra.natalia.superdotacao", url: "https://www.instagram.com/dra.natalia.superdotacao/",niche: "Medicine"    },
+  { id: 20, handle: "@shirleybrandaooficial",    url: "https://www.instagram.com/shirleybrandaooficial/",   niche: ""            },
+  { id: 21, handle: "@sergio.rsr",               url: "https://www.instagram.com/sergio.rsr",               niche: ""            },
+  { id: 22, handle: "@paulafagundesdelima",      url: "https://www.instagram.com/paulafagundesdelima/",     niche: ""            },
+  { id: 23, handle: "@amandamol_",               url: "https://www.instagram.com/amandamol_/",              niche: ""            },
+  { id: 24, handle: "@dracarolinameireles",      url: "https://www.instagram.com/dracarolinameireles/",     niche: "Medicine"    },
+  { id: 25, handle: "@dracarolina.lopess",       url: "https://www.instagram.com/dracarolina.lopess/",      niche: "Medicine"    },
+  { id: 26, handle: "@diegobecharacruz",         url: "https://www.instagram.com/diegobecharacruz/",        niche: ""            },
+  { id: 27, handle: "@kaline.cardosog",          url: "https://www.instagram.com/kaline.cardosog/",         niche: ""            },
+  { id: 28, handle: "@jaquelinepimentelmentora", url: "https://www.instagram.com/jaquelinepimentelmentora/",niche: "Mentoring"   },
+  { id: 29, handle: "@gabiikt",                  url: "https://www.instagram.com/gabiikt/",                 niche: ""            },
+  { id: 30, handle: "@lucianagontijo_",          url: "https://www.instagram.com/lucianagontijo_/",         niche: ""            },
+  { id: 31, handle: "@patriciahonnorio",         url: "https://www.instagram.com/patriciahonnorio",         niche: ""            },
+  { id: 32, handle: "@psico.tamararezende",      url: "https://www.instagram.com/psico.tamararezende/",     niche: "Psychology"  },
+  { id: 33, handle: "@carinepereiraofc",         url: "https://www.instagram.com/carinepereiraofc/",        niche: ""            },
+  { id: 34, handle: "@adrianademello",           url: "https://www.instagram.com/adrianademello/",          niche: ""            },
+  { id: 35, handle: "@drakarolmetello",          url: "https://www.instagram.com/drakarolmetello/",         niche: "Medicine"    },
+  { id: 36, handle: "@dradanielagrespi",         url: "https://www.instagram.com/dradanielagrespi/",        niche: "Medicine"    },
+  { id: 37, handle: "@vocacaodepai",             url: "https://www.instagram.com/vocacaodepai/",            niche: "Parenting"   },
+  { id: 38, handle: "@lethiciacordeiroped",      url: "https://www.instagram.com/lethiciacordeiroped/",      niche: ""            },
+  { id: 39, handle: "@psi.loriany",              url: "https://www.instagram.com/psi.loriany/",              niche: "Psychology"  },
+  { id: 40, handle: "@drazaramella",             url: "https://www.instagram.com/drazaramella/",             niche: "Medicine"    },
+  { id: 41, handle: "@heloizaduartee",           url: "https://www.instagram.com/heloizaduartee/",           niche: ""            },
+  { id: 42, handle: "@leveavidaleve.sayra",      url: "https://www.instagram.com/leveavidaleve.sayra/",      niche: ""            },
+  { id: 43, handle: "@dramarina.almaemedicina",  url: "https://www.instagram.com/dramarina.almaemedicina/",  niche: "Medicine"    },
+  { id: 44, handle: "@amandamansur17",           url: "https://www.instagram.com/amandamansur17/",           niche: ""            },
+  { id: 45, handle: "@arq.julianizanelato",      url: "https://www.instagram.com/arq.julianizanelato/",      niche: "Architecture"},
+  { id: 46, handle: "@yasssfreitas",             url: "https://www.instagram.com/yasssfreitas/",             niche: ""            },
+  { id: 47, handle: "@fleximind.psi",            url: "https://www.instagram.com/fleximind.psi/",            niche: "Psychology"  },
+  { id: 48, handle: "@dra.noemyueno",            url: "https://www.instagram.com/dra.noemyueno/",            niche: "Medicine"    },
+  { id: 49, handle: "@vander.mapadaliberdade",   url: "https://www.instagram.com/vander.mapadaliberdade/",   niche: ""            },
+  { id: 50, handle: "@mafervox",                 url: "https://www.instagram.com/mafervox/",                 niche: ""            },
+  { id: 51, handle: "@vestidaparaumcafe",        url: "https://www.instagram.com/vestidaparaumcafe/",        niche: ""            },
+  { id: 52, handle: "@eusilmaraluz",             url: "https://www.instagram.com/eusilmaraluz/",             niche: ""            },
+  { id: 53, handle: "@silviolessaneuro",         url: "https://www.instagram.com/silviolessaneuro/",         niche: "Medicine"    },
+  { id: 54, handle: "@alucianasaraiva",          url: "https://www.instagram.com/alucianasaraiva/",          niche: ""            },
+  { id: 55, handle: "@samaranarcizo",            url: "https://www.instagram.com/samaranarcizo/",            niche: ""            },
+  { id: 56, handle: "@cibelevondentz",           url: "https://www.instagram.com/cibelevondentz/",           niche: ""            },
+  { id: 57, handle: "@tatianyteotonio",          url: "https://www.instagram.com/tatianyteotonio/",          niche: ""            },
+  { id: 58, handle: "@dra_priscilafranca",       url: "https://www.instagram.com/dra_priscilafranca/",       niche: "Medicine"    },
+  { id: 59, handle: "@puxao_deorelha",           url: "https://www.instagram.com/puxao_deorelha/",           niche: ""            },
+  { id: 60, handle: "@neurolaisperini",          url: "https://www.instagram.com/neurolaisperini/",          niche: "Medicine"    },
+  { id: 61, handle: "@drafrancianne.andrade",    url: "https://www.instagram.com/drafrancianne.andrade/",    niche: "Medicine"    },
+  { id: 62, handle: "@draamunygobato",           url: "https://www.instagram.com/draamunygobato/",           niche: "Medicine"    },
+  { id: 63, handle: "@thaisferguson",            url: "https://www.instagram.com/thaisferguson/",            niche: ""            },
+  { id: 64, handle: "@deniapsi",                url: "https://www.instagram.com/deniapsi/",                niche: "Psychology"  },
+  { id: 65, handle: "@dragrazielamartins",       url: "https://www.instagram.com/dragrazielamartins/",       niche: "Medicine"    },
+  { id: 66, handle: "@dra.kauanyaguiar",         url: "https://www.instagram.com/dra.kauanyaguiar/",         niche: "Medicine"    },
+  { id: 67, handle: "@caroljabarra",             url: "https://www.instagram.com/caroljabarra/",             niche: ""            },
+  { id: 68, handle: "@isadoratavares_advogada", url: "http://instagram.com/isadoratavares_advogada",          niche: "Law"         },
+  { id: 69, handle: "@tatiana.tayti",           url: "https://www.instagram.com/tatiana.tayti",               niche: ""            },
+  { id: 70, handle: "@drafeporphirio",          url: "https://www.instagram.com/drafeporphirio/",             niche: "Medicine"    },
+  { id: 71, handle: "@dragiovanna.vascular",    url: "https://www.instagram.com/dragiovanna.vascular",        niche: "Medicine"    },
+  { id: 72, handle: "@luisolivieri",            url: "https://www.instagram.com/luisolivieri",                niche: ""            },
+  { id: 73, handle: "@drnordon",                url: "https://www.instagram.com/drnordon",                   niche: "Medicine"    },
+  { id: 74, handle: "@dr.felipeantunes",        url: "https://www.instagram.com/dr.felipeantunes",           niche: "Medicine"    },
+  { id: 75, handle: "@carolsilveirapsi",        url: "https://www.instagram.com/carolsilveirapsi",           niche: "Psychology"  },
+  { id: 76, handle: "@drarhayffa.pediatra",     url: "https://www.instagram.com/drarhayffa.pediatra",        niche: "Medicine"    },
+  { id: 77, handle: "@dra.andrea.damasceno",    url: "https://www.instagram.com/dra.andrea.damasceno",       niche: "Medicine"    },
+  { id: 78, handle: "@dramarinarossato",        url: "https://www.instagram.com/dramarinarossato",           niche: "Medicine"    },
+  { id: 79, handle: "@drasandranaufal",         url: "https://www.instagram.com/drasandranaufal",            niche: "Medicine"    },
+  { id: 80, handle: "@dra.izabelladalbuquerque",url: "https://www.instagram.com/dra.izabelladalbuquerque",   niche: "Medicine"    },
+  { id: 81, handle: "@draalicebertelli",        url: "https://www.instagram.com/draalicebertelli",           niche: "Medicine"    },
+];
+
+// ── Removed IDs ───────────────────────────────────────────────────────────────
+function loadRemoved() {
+  try { return JSON.parse(localStorage.getItem(REMOVED_KEY)) || []; }
+  catch { return []; }
+}
+function saveRemoved(arr) { localStorage.setItem(REMOVED_KEY, JSON.stringify(arr)); }
+
+let removedIds = new Set(loadRemoved());
+let profiles = ALL_PROFILES.filter(p => !removedIds.has(p.id));
+
+// ── Status storage ────────────────────────────────────────────────────────────
+function loadStatuses() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveStatuses(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+
+// ── History storage ({[id]: {[status]: 'YYYY-MM-DD'}}) ───────────────────────
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveHistory(h) { localStorage.setItem(HISTORY_KEY, JSON.stringify(h)); }
+
+function todayISO() {
+  const d = new Date();
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
+
+// Migrate: remove "Seguiu de volta" (old index 2); remap 3→2, 4→3, 5→4, 6→5, 7→6
+(function migrateRemoveStage2() {
+  const s = loadStatuses();
+  const h = loadHistory();
+  let changed = false;
+  Object.keys(s).forEach(id => {
+    const v = s[id];
+    if (v === 2) { s[id] = 1; changed = true; }
+    else if (v >= 3) { s[id] = v - 1; changed = true; }
+  });
+  Object.keys(h).forEach(id => {
+    const entry = h[id];
+    const newEntry = {};
+    let entryChanged = false;
+    Object.keys(entry).forEach(k => {
+      const ki = parseInt(k);
+      if (ki === 2) { if (!newEntry[1]) newEntry[1] = entry[k]; entryChanged = true; }
+      else if (ki >= 3) { newEntry[ki - 1] = entry[k]; entryChanged = true; }
+      else { newEntry[k] = entry[k]; }
+    });
+    if (entryChanged) { h[id] = newEntry; changed = true; }
+  });
+  if (changed) { saveStatuses(s); saveHistory(h); }
+})();
+
+let statuses = loadStatuses();
+
+function getStatus(id) { return statuses[id] !== undefined ? statuses[id] : 0; }
+
+function advanceStatus(id) {
+  const next = (getStatus(id) + 1) % STAGES.length;
+  statuses[id] = next;
+  saveStatuses(statuses);
+  const history = loadHistory();
+  if (next === 0) {
+    delete history[id];
+  } else if (!history[id]) {
+    history[id] = { [next]: todayISO() };
+  } else if (!history[id][next]) {
+    history[id][next] = todayISO();
+  }
+  saveHistory(history);
+  render();
+}
+
+// ── Selection ─────────────────────────────────────────────────────────────────
+let selected = new Set();
+let visibleIds = [];
+
+function toggleSelect(id) {
+  if (selected.has(id)) selected.delete(id);
+  else selected.add(id);
+  updateBulkBar();
+  // sync select-all checkbox
+  const allChecked = visibleIds.length > 0 && visibleIds.every(i => selected.has(i));
+  const sa = document.getElementById('selectAll');
+  if (sa) sa.checked = allChecked;
+}
+
+function toggleSelectAll(checked) {
+  if (checked) visibleIds.forEach(i => selected.add(i));
+  else visibleIds.forEach(i => selected.delete(i));
+  // re-render just the checkboxes without full table rebuild
+  document.querySelectorAll('tbody input[type="checkbox"]').forEach(cb => {
+    cb.checked = checked;
+  });
+  updateBulkBar();
+}
+
+function updateBulkBar() {
+  const n = selected.size;
+  document.getElementById('selectedCount').textContent =
+    n === 0 ? '' : `${n} selecionado${n !== 1 ? 's' : ''}`;
+  const hasSelection = n > 0;
+  const hasAction = document.getElementById('bulkAction').value !== '';
+  document.getElementById('btnApply').disabled = !(hasSelection && hasAction);
+}
+
+document.getElementById('bulkAction').addEventListener('change', updateBulkBar);
+
+// ── Bulk actions ──────────────────────────────────────────────────────────────
+function applyBulkAction() {
+  const action = document.getElementById('bulkAction').value;
+  if (!action || selected.size === 0) return;
+  if (action === 'open') doOpenProfiles();
+  else if (action === 'remove') showRemoveModal();
+  else if (action.startsWith('status-')) bulkSetStatus(parseInt(action.split('-')[1]));
+}
+
+function bulkSetStatus(newStatus) {
+  const history = loadHistory();
+  const today = todayISO();
+  [...selected].forEach(id => {
+    statuses[id] = newStatus;
+    if (newStatus === 0) {
+      delete history[id];
+    } else {
+      if (!history[id]) history[id] = {};
+      if (!history[id][newStatus]) history[id][newStatus] = today;
+    }
+  });
+  saveStatuses(statuses);
+  saveHistory(history);
+  document.getElementById('bulkAction').value = '';
+  updateBulkBar();
+  render();
+}
+
+function doOpenProfiles() {
+  const toOpen = profiles.filter(p => selected.has(p.id));
+  // Browsers block simultaneous window.open — stagger by 120ms per tab
+  toOpen.forEach((p, i) => {
+    setTimeout(() => window.open(p.url, '_blank', 'noopener'), i * 120);
+  });
+}
+
+function showRemoveModal() {
+  const n = selected.size;
+  const plural = n !== 1;
+  document.getElementById('modalBody').innerHTML =
+    `Você tem certeza? <strong>${n} prospect${plural ? 's' : ''}</strong> ser${plural ? 'ão' : 'á'} removido${plural ? 's' : ''} permanentemente da lista.`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function hideModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function confirmRemove() {
+  const toRemove = [...selected];
+  toRemove.forEach(id => removedIds.add(id));
+  saveRemoved([...removedIds]);
+
+  const s = loadStatuses();
+  const h = loadHistory();
+  toRemove.forEach(id => { delete s[id]; delete h[id]; });
+  saveStatuses(s);
+  saveHistory(h);
+
+  profiles = ALL_PROFILES.filter(p => !removedIds.has(p.id));
+  selected.clear();
+  hideModal();
+  render();
+}
+
+// ── Chart range ───────────────────────────────────────────────────────────────
+let chartDays = 30;
+
+function setPreset(days) {
+  chartDays = days;
+  document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
+  document.getElementById('preset-' + days).classList.add('active');
+  renderChart();
+}
+
+// ── Chart ─────────────────────────────────────────────────────────────────────
+function buildDays(n) {
+  const days = [];
+  const now = new Date();
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const iso = d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getDate()).padStart(2, '0');
+    const label = String(d.getDate()).padStart(2, '0') + '/' +
+      String(d.getMonth() + 1).padStart(2, '0');
+    days.push({ iso, label });
+  }
+  return days;
+}
+
+function renderChart() {
+  const history = loadHistory();
+  const days = buildDays(chartDays);
+
+  document.getElementById('chartTitle').textContent = `Atividade — últimos ${chartDays} dias`;
+
+  const data = days.map(({ iso, label }) => {
+    const counts = {};
+    SERIES.forEach(s => { counts[s.key] = 0; });
+    Object.values(history).forEach(h => {
+      SERIES.forEach(s => { if (h[s.toStatus] === iso) counts[s.key]++; });
+    });
+    return { label, ...counts };
+  });
+
+  const W = 900, H = 170;
+  const mL = 28, mR = 12, mT = 8, mB = 32;
+  const cW = W - mL - mR;
+  const cH = H - mT - mB;
+
+  const maxVal = Math.max(1, ...data.flatMap(d => SERIES.map(s => d[s.key])));
+
+  const n = data.length;
+  const ns = SERIES.length;
+  const groupW = cW / n;
+  const barGap = 1.5;
+  const barW = Math.max(2, Math.min(8, (groupW - 10) / ns));
+  const groupTotal = ns * barW + (ns - 1) * barGap;
+
+  const gridLines = Math.min(maxVal, 4);
+  let grid = '';
+  for (let i = 0; i <= gridLines; i++) {
+    const y = mT + cH * (1 - i / gridLines);
+    const val = Math.round(maxVal * i / gridLines);
+    grid += `<line x1="${mL}" y1="${y.toFixed(1)}" x2="${W - mR}" y2="${y.toFixed(1)}"
+      stroke="${i === 0 ? '#2a2a2a' : '#1e1e1e'}" stroke-width="1"/>`;
+    grid += `<text x="${mL - 5}" y="${(y + 3.5).toFixed(1)}" text-anchor="end"
+      font-size="9" fill="#444">${val}</text>`;
+  }
+
+  let bars = '';
+  data.forEach((d, i) => {
+    const gx = mL + i * groupW + (groupW - groupTotal) / 2;
+    SERIES.forEach((s, j) => {
+      const val = d[s.key];
+      const bH = val === 0 ? 0 : Math.max(2, (val / maxVal) * cH);
+      const x = gx + j * (barW + barGap);
+      const y = mT + cH - bH;
+      bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}"
+        width="${barW.toFixed(1)}" height="${bH.toFixed(1)}"
+        fill="${s.color}" rx="1.5"/>`;
+    });
+    const lx = mL + i * groupW + groupW / 2;
+    const ly = mT + cH + 18;
+    bars += `<text x="${lx.toFixed(1)}" y="${ly}"
+      text-anchor="middle" font-size="9" fill="#555">${d.label}</text>`;
+  });
+
+  document.getElementById('chart').innerHTML =
+    `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
+      style="width:100%;display:block;">${grid}${bars}</svg>`;
+}
+
+// ── Metric cards ──────────────────────────────────────────────────────────────
+function getCounts() {
+  const c = Array(STAGES.length).fill(0);
+  profiles.forEach(p => c[getStatus(p.id)]++);
+  return c;
+}
+
+function renderCards() {
+  const counts = getCounts();
+  const sf = document.getElementById('statusFilter').value;
+  document.getElementById('cards').innerHTML = STAGES.map((s, i) => `
+    <div class="card${sf === String(i) ? ' active' : ''}" onclick="filterByCard(${i})">
+      <div class="card-label">${s}</div>
+      <div class="card-count">${counts[i]}</div>
+    </div>`).join('');
+}
+
+function filterByCard(stageIndex) {
+  const sf = document.getElementById('statusFilter');
+  sf.value = sf.value === String(stageIndex) ? '' : String(stageIndex);
+  render();
+}
+
+// ── Table ─────────────────────────────────────────────────────────────────────
+function render() {
+  const search = document.getElementById('search').value.toLowerCase().trim();
+  const sf = document.getElementById('statusFilter').value;
+  const filtered = profiles.filter(p => {
+    const ms = !search || p.handle.toLowerCase().includes(search) || p.niche.toLowerCase().includes(search);
+    const mf = sf === '' || getStatus(p.id) === parseInt(sf);
+    return ms && mf;
+  });
+
+  visibleIds = filtered.map(p => p.id);
+
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = filtered.length === 0
+    ? `<tr><td colspan="5" class="empty">Nenhum resultado</td></tr>`
+    : filtered.map(p => {
+        const st = getStatus(p.id);
+        const chk = selected.has(p.id) ? 'checked' : '';
+        return `<tr>
+          <td class="check-col"><input type="checkbox" ${chk} onchange="toggleSelect(${p.id})"></td>
+          <td class="num">${p.id}</td>
+          <td><a href="${p.url}" target="_blank" rel="noopener">${p.handle}</a></td>
+          <td class="niche">${p.niche || '—'}</td>
+          <td><span class="badge badge-${st}" onclick="advanceStatus(${p.id})">${STAGES[st]}</span></td>
+        </tr>`;
+      }).join('');
+
+  const allChecked = visibleIds.length > 0 && visibleIds.every(i => selected.has(i));
+  const sa = document.getElementById('selectAll');
+  if (sa) sa.checked = allChecked;
+
+  updateBulkBar();
+  renderCards();
+  renderChart();
+}
+
+document.getElementById('search').addEventListener('input', render);
+document.getElementById('statusFilter').addEventListener('change', render);
+
+// Close modal on overlay click
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) hideModal();
+});
+
+
+render();
+</script>
+</body>
+</html>
