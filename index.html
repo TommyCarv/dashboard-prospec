@@ -504,7 +504,11 @@ function setSyncStatus(state, text) {
 async function loadFromSheets() {
   setSyncStatus('syncing', 'Carregando...');
   try {
-    const res = await fetch(API_URL + '?action=load');
+    const url = API_URL + '?action=load&cb=' + Date.now();
+    const res = await fetch(url, {
+      method: 'GET',
+      mode: 'cors',
+    });
     const data = await res.json();
     statuses   = data.statuses  || {};
     history    = data.history   || {};
@@ -521,17 +525,20 @@ async function loadFromSheets() {
 
 async function saveToSheets() {
   setSyncStatus('syncing', 'Salvando...');
-  // Also persist locally as backup
   saveToLocal();
   try {
+    const payload = JSON.stringify({
+      action: 'save',
+      statuses,
+      history,
+      removed: [...removedIds]
+    });
+    // Use no-cors for POST to avoid preflight issues
     await fetch(API_URL, {
       method: 'POST',
-      body: JSON.stringify({
-        action: 'save',
-        statuses,
-        history,
-        removed: [...removedIds]
-      })
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: payload
     });
     setSyncStatus('ok', 'Salvo · ' + timeNow());
   } catch (e) {
