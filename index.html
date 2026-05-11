@@ -16,9 +16,49 @@
     min-height: 100vh;
     padding: 24px;
   }
-  h1 { font-size: 2rem; font-weight: 400; margin-bottom: 24px; color: #fff; font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.04em; }
+  h1 { font-size: 2rem; font-weight: 400; margin-bottom: 8px; color: #fff; font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.04em; }
   .card-label { font-size: 0.75rem; color: #888; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.08em; font-family: 'Bebas Neue', sans-serif; }
   .card-count { font-size: 2.4rem; font-weight: 700; color: #fff; font-family: 'Bebas Neue', sans-serif; }
+
+  /* Sync bar */
+  .sync-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .sync-status {
+    font-size: 0.75rem;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sync-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #555;
+    flex-shrink: 0;
+    transition: background 0.3s;
+  }
+  .sync-dot.ok { background: #4caf7d; }
+  .sync-dot.syncing { background: #f0b429; animation: pulse 0.8s infinite; }
+  .sync-dot.error { background: #ff6b6b; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .btn-sync {
+    background: transparent;
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    color: #666;
+    padding: 5px 12px;
+    font-size: 0.75rem;
+    font-family: 'Roboto Condensed', sans-serif;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .btn-sync:hover { border-color: #444; color: #bbb; }
 
   /* Chart */
   .chart-section {
@@ -48,7 +88,6 @@
   .leg-dot-6 { background: #ff6b6b; }
   #chart { width: 100%; }
 
-  /* Chart range controls */
   .chart-controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
   .btn-range {
     background: transparent;
@@ -65,7 +104,6 @@
   }
   .btn-range:hover { border-color: #444; color: #bbb; }
   .btn-range.active { border-color: #6b9eff; color: #6b9eff; background: rgba(107,158,255,0.08); }
-
 
   /* Metric cards */
   .cards { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
@@ -100,7 +138,6 @@
   select { cursor: pointer; }
   select option { background: #1a1a1a; }
 
-  /* Checkbox — custom styled */
   input[type="checkbox"] {
     -webkit-appearance: none;
     appearance: none;
@@ -116,20 +153,14 @@
     transition: border-color 0.15s, background 0.15s;
   }
   input[type="checkbox"]:hover { border-color: #555; }
-  input[type="checkbox"]:checked {
-    background: #6b9eff;
-    border-color: #6b9eff;
-  }
+  input[type="checkbox"]:checked { background: #6b9eff; border-color: #6b9eff; }
   input[type="checkbox"]:checked::after {
     content: '';
     position: absolute;
-    left: 4px;
-    top: 1px;
-    width: 4px;
-    height: 7px;
+    left: 4px; top: 1px;
+    width: 4px; height: 7px;
     border: 1.5px solid #fff;
-    border-top: none;
-    border-left: none;
+    border-top: none; border-left: none;
     transform: rotate(45deg);
   }
   th.check-col, td.check-col { width: 40px; padding: 12px 10px 12px 16px; }
@@ -191,6 +222,29 @@
   .num { color: #555; }
   .empty { text-align: center; padding: 40px; color: #555; }
 
+  /* Loading overlay */
+  .loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,15,15,0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+    gap: 14px;
+  }
+  .loading-overlay.hidden { display: none; }
+  .loading-spinner {
+    width: 32px; height: 32px;
+    border: 2px solid #2a2a2a;
+    border-top-color: #6b9eff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 0.875rem; color: #555; font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.08em; }
+
   /* Modal */
   .modal-overlay {
     display: none;
@@ -211,42 +265,43 @@
     max-width: 92vw;
     animation: popIn 0.18s ease;
   }
-  @keyframes popIn {
-    from { transform: scale(0.92); opacity: 0; }
-    to   { transform: scale(1);    opacity: 1; }
-  }
+  @keyframes popIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   .modal-title { font-size: 1.4rem; color: #fff; margin-bottom: 10px; font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.05em; }
   .modal-body { font-size: 0.875rem; color: #888; margin-bottom: 26px; line-height: 1.55; }
   .modal-body strong { color: #ff6b6b; }
   .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
   .btn-cancel {
-    background: #222;
-    border: 1px solid #333;
-    border-radius: 6px;
-    color: #aaa;
-    padding: 8px 18px;
-    font-size: 0.875rem;
-    cursor: pointer;
+    background: #222; border: 1px solid #333; border-radius: 6px;
+    color: #aaa; padding: 8px 18px; font-size: 0.875rem; cursor: pointer;
     transition: border-color 0.15s, color 0.15s;
   }
   .btn-cancel:hover { border-color: #555; color: #eee; }
   .btn-confirm-danger {
-    background: #3a1010;
-    border: 1px solid #ff6b6b;
-    border-radius: 6px;
-    color: #ff6b6b;
-    padding: 8px 18px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s;
+    background: #3a1010; border: 1px solid #ff6b6b; border-radius: 6px;
+    color: #ff6b6b; padding: 8px 18px; font-size: 0.875rem; font-weight: 600;
+    cursor: pointer; transition: background 0.15s;
   }
   .btn-confirm-danger:hover { background: #4e1515; }
 </style>
 </head>
 <body>
 
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Carregando dados...</div>
+</div>
+
 <h1>Prospect Dashboard</h1>
+
+<!-- Sync status bar -->
+<div class="sync-bar">
+  <div class="sync-status">
+    <div class="sync-dot" id="syncDot"></div>
+    <span id="syncText">Conectando...</span>
+  </div>
+  <button class="btn-sync" onclick="syncNow()">↻ Sincronizar agora</button>
+</div>
 
 <div class="chart-section">
   <div class="chart-header">
@@ -329,10 +384,10 @@
 </div>
 
 <script>
-const STAGES      = ['Not started', 'Segui', 'Engajamento', '1° contato DM', 'Conversando DM', 'Convertido', 'Perdido'];
-const STORAGE_KEY = 'prospect_statuses';
-const HISTORY_KEY = 'prospect_history';
-const REMOVED_KEY = 'prospect_removed';
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const API_URL = 'https://script.google.com/macros/s/AKfycbxjyg_m8DAMOrRPjPpEGkYsWm6URoqmCOLID4V74edytwCbBll__E658K3pKpeQpnW4Yg/exec';
+
+const STAGES = ['Not started', 'Segui', 'Engajamento', '1° contato DM', 'Conversando DM', 'Convertido', 'Perdido'];
 
 const SERIES = [
   { key: 'segui',       color: '#6ab0ff', label: 'Segui',          toStatus: 1 },
@@ -381,137 +436,171 @@ const ALL_PROFILES = [
   { id: 35, handle: "@drakarolmetello",          url: "https://www.instagram.com/drakarolmetello/",         niche: "Medicine"    },
   { id: 36, handle: "@dradanielagrespi",         url: "https://www.instagram.com/dradanielagrespi/",        niche: "Medicine"    },
   { id: 37, handle: "@vocacaodepai",             url: "https://www.instagram.com/vocacaodepai/",            niche: "Parenting"   },
-  { id: 38, handle: "@lethiciacordeiroped",      url: "https://www.instagram.com/lethiciacordeiroped/",      niche: ""            },
-  { id: 39, handle: "@psi.loriany",              url: "https://www.instagram.com/psi.loriany/",              niche: "Psychology"  },
-  { id: 40, handle: "@drazaramella",             url: "https://www.instagram.com/drazaramella/",             niche: "Medicine"    },
-  { id: 41, handle: "@heloizaduartee",           url: "https://www.instagram.com/heloizaduartee/",           niche: ""            },
-  { id: 42, handle: "@leveavidaleve.sayra",      url: "https://www.instagram.com/leveavidaleve.sayra/",      niche: ""            },
-  { id: 43, handle: "@dramarina.almaemedicina",  url: "https://www.instagram.com/dramarina.almaemedicina/",  niche: "Medicine"    },
-  { id: 44, handle: "@amandamansur17",           url: "https://www.instagram.com/amandamansur17/",           niche: ""            },
-  { id: 45, handle: "@arq.julianizanelato",      url: "https://www.instagram.com/arq.julianizanelato/",      niche: "Architecture"},
-  { id: 46, handle: "@yasssfreitas",             url: "https://www.instagram.com/yasssfreitas/",             niche: ""            },
-  { id: 47, handle: "@fleximind.psi",            url: "https://www.instagram.com/fleximind.psi/",            niche: "Psychology"  },
-  { id: 48, handle: "@dra.noemyueno",            url: "https://www.instagram.com/dra.noemyueno/",            niche: "Medicine"    },
-  { id: 49, handle: "@vander.mapadaliberdade",   url: "https://www.instagram.com/vander.mapadaliberdade/",   niche: ""            },
-  { id: 50, handle: "@mafervox",                 url: "https://www.instagram.com/mafervox/",                 niche: ""            },
-  { id: 51, handle: "@vestidaparaumcafe",        url: "https://www.instagram.com/vestidaparaumcafe/",        niche: ""            },
-  { id: 52, handle: "@eusilmaraluz",             url: "https://www.instagram.com/eusilmaraluz/",             niche: ""            },
-  { id: 53, handle: "@silviolessaneuro",         url: "https://www.instagram.com/silviolessaneuro/",         niche: "Medicine"    },
-  { id: 54, handle: "@alucianasaraiva",          url: "https://www.instagram.com/alucianasaraiva/",          niche: ""            },
-  { id: 55, handle: "@samaranarcizo",            url: "https://www.instagram.com/samaranarcizo/",            niche: ""            },
-  { id: 56, handle: "@cibelevondentz",           url: "https://www.instagram.com/cibelevondentz/",           niche: ""            },
-  { id: 57, handle: "@tatianyteotonio",          url: "https://www.instagram.com/tatianyteotonio/",          niche: ""            },
-  { id: 58, handle: "@dra_priscilafranca",       url: "https://www.instagram.com/dra_priscilafranca/",       niche: "Medicine"    },
-  { id: 59, handle: "@puxao_deorelha",           url: "https://www.instagram.com/puxao_deorelha/",           niche: ""            },
-  { id: 60, handle: "@neurolaisperini",          url: "https://www.instagram.com/neurolaisperini/",          niche: "Medicine"    },
-  { id: 61, handle: "@drafrancianne.andrade",    url: "https://www.instagram.com/drafrancianne.andrade/",    niche: "Medicine"    },
-  { id: 62, handle: "@draamunygobato",           url: "https://www.instagram.com/draamunygobato/",           niche: "Medicine"    },
-  { id: 63, handle: "@thaisferguson",            url: "https://www.instagram.com/thaisferguson/",            niche: ""            },
+  { id: 38, handle: "@lethiciacordeiroped",      url: "https://www.instagram.com/lethiciacordeiroped/",     niche: ""            },
+  { id: 39, handle: "@psi.loriany",              url: "https://www.instagram.com/psi.loriany/",             niche: "Psychology"  },
+  { id: 40, handle: "@drazaramella",             url: "https://www.instagram.com/drazaramella/",            niche: "Medicine"    },
+  { id: 41, handle: "@heloizaduartee",           url: "https://www.instagram.com/heloizaduartee/",          niche: ""            },
+  { id: 42, handle: "@leveavidaleve.sayra",      url: "https://www.instagram.com/leveavidaleve.sayra/",     niche: ""            },
+  { id: 43, handle: "@dramarina.almaemedicina",  url: "https://www.instagram.com/dramarina.almaemedicina/", niche: "Medicine"    },
+  { id: 44, handle: "@amandamansur17",           url: "https://www.instagram.com/amandamansur17/",          niche: ""            },
+  { id: 45, handle: "@arq.julianizanelato",      url: "https://www.instagram.com/arq.julianizanelato/",     niche: "Architecture"},
+  { id: 46, handle: "@yasssfreitas",             url: "https://www.instagram.com/yasssfreitas/",            niche: ""            },
+  { id: 47, handle: "@fleximind.psi",            url: "https://www.instagram.com/fleximind.psi/",           niche: "Psychology"  },
+  { id: 48, handle: "@dra.noemyueno",            url: "https://www.instagram.com/dra.noemyueno/",           niche: "Medicine"    },
+  { id: 49, handle: "@vander.mapadaliberdade",   url: "https://www.instagram.com/vander.mapadaliberdade/",  niche: ""            },
+  { id: 50, handle: "@mafervox",                 url: "https://www.instagram.com/mafervox/",                niche: ""            },
+  { id: 51, handle: "@vestidaparaumcafe",        url: "https://www.instagram.com/vestidaparaumcafe/",       niche: ""            },
+  { id: 52, handle: "@eusilmaraluz",             url: "https://www.instagram.com/eusilmaraluz/",            niche: ""            },
+  { id: 53, handle: "@silviolessaneuro",         url: "https://www.instagram.com/silviolessaneuro/",        niche: "Medicine"    },
+  { id: 54, handle: "@alucianasaraiva",          url: "https://www.instagram.com/alucianasaraiva/",         niche: ""            },
+  { id: 55, handle: "@samaranarcizo",            url: "https://www.instagram.com/samaranarcizo/",           niche: ""            },
+  { id: 56, handle: "@cibelevondentz",           url: "https://www.instagram.com/cibelevondentz/",          niche: ""            },
+  { id: 57, handle: "@tatianyteotonio",          url: "https://www.instagram.com/tatianyteotonio/",         niche: ""            },
+  { id: 58, handle: "@dra_priscilafranca",       url: "https://www.instagram.com/dra_priscilafranca/",      niche: "Medicine"    },
+  { id: 59, handle: "@puxao_deorelha",           url: "https://www.instagram.com/puxao_deorelha/",          niche: ""            },
+  { id: 60, handle: "@neurolaisperini",          url: "https://www.instagram.com/neurolaisperini/",         niche: "Medicine"    },
+  { id: 61, handle: "@drafrancianne.andrade",    url: "https://www.instagram.com/drafrancianne.andrade/",   niche: "Medicine"    },
+  { id: 62, handle: "@draamunygobato",           url: "https://www.instagram.com/draamunygobato/",          niche: "Medicine"    },
+  { id: 63, handle: "@thaisferguson",            url: "https://www.instagram.com/thaisferguson/",           niche: ""            },
   { id: 64, handle: "@deniapsi",                url: "https://www.instagram.com/deniapsi/",                niche: "Psychology"  },
-  { id: 65, handle: "@dragrazielamartins",       url: "https://www.instagram.com/dragrazielamartins/",       niche: "Medicine"    },
-  { id: 66, handle: "@dra.kauanyaguiar",         url: "https://www.instagram.com/dra.kauanyaguiar/",         niche: "Medicine"    },
-  { id: 67, handle: "@caroljabarra",             url: "https://www.instagram.com/caroljabarra/",             niche: ""            },
-  { id: 68, handle: "@isadoratavares_advogada", url: "http://instagram.com/isadoratavares_advogada",          niche: "Law"         },
-  { id: 69, handle: "@tatiana.tayti",           url: "https://www.instagram.com/tatiana.tayti",               niche: ""            },
-  { id: 70, handle: "@drafeporphirio",          url: "https://www.instagram.com/drafeporphirio/",             niche: "Medicine"    },
-  { id: 71, handle: "@dragiovanna.vascular",    url: "https://www.instagram.com/dragiovanna.vascular",        niche: "Medicine"    },
-  { id: 72, handle: "@luisolivieri",            url: "https://www.instagram.com/luisolivieri",                niche: ""            },
-  { id: 73, handle: "@drnordon",                url: "https://www.instagram.com/drnordon",                   niche: "Medicine"    },
-  { id: 74, handle: "@dr.felipeantunes",        url: "https://www.instagram.com/dr.felipeantunes",           niche: "Medicine"    },
-  { id: 75, handle: "@carolsilveirapsi",        url: "https://www.instagram.com/carolsilveirapsi",           niche: "Psychology"  },
-  { id: 76, handle: "@drarhayffa.pediatra",     url: "https://www.instagram.com/drarhayffa.pediatra",        niche: "Medicine"    },
-  { id: 77, handle: "@dra.andrea.damasceno",    url: "https://www.instagram.com/dra.andrea.damasceno",       niche: "Medicine"    },
-  { id: 78, handle: "@dramarinarossato",        url: "https://www.instagram.com/dramarinarossato",           niche: "Medicine"    },
-  { id: 79, handle: "@drasandranaufal",         url: "https://www.instagram.com/drasandranaufal",            niche: "Medicine"    },
-  { id: 80, handle: "@dra.izabelladalbuquerque",url: "https://www.instagram.com/dra.izabelladalbuquerque",   niche: "Medicine"    },
-  { id: 81, handle: "@draalicebertelli",        url: "https://www.instagram.com/draalicebertelli",           niche: "Medicine"    },
+  { id: 65, handle: "@dragrazielamartins",       url: "https://www.instagram.com/dragrazielamartins/",      niche: "Medicine"    },
+  { id: 66, handle: "@dra.kauanyaguiar",         url: "https://www.instagram.com/dra.kauanyaguiar/",        niche: "Medicine"    },
+  { id: 67, handle: "@caroljabarra",             url: "https://www.instagram.com/caroljabarra/",            niche: ""            },
+  { id: 68, handle: "@isadoratavares_advogada",  url: "http://instagram.com/isadoratavares_advogada",        niche: "Law"         },
+  { id: 69, handle: "@tatiana.tayti",            url: "https://www.instagram.com/tatiana.tayti",            niche: ""            },
+  { id: 70, handle: "@drafeporphirio",           url: "https://www.instagram.com/drafeporphirio/",          niche: "Medicine"    },
+  { id: 71, handle: "@dragiovanna.vascular",     url: "https://www.instagram.com/dragiovanna.vascular",     niche: "Medicine"    },
+  { id: 72, handle: "@luisolivieri",             url: "https://www.instagram.com/luisolivieri",             niche: ""            },
+  { id: 73, handle: "@drnordon",                 url: "https://www.instagram.com/drnordon",                 niche: "Medicine"    },
+  { id: 74, handle: "@dr.felipeantunes",         url: "https://www.instagram.com/dr.felipeantunes",         niche: "Medicine"    },
+  { id: 75, handle: "@carolsilveirapsi",         url: "https://www.instagram.com/carolsilveirapsi",         niche: "Psychology"  },
+  { id: 76, handle: "@drarhayffa.pediatra",      url: "https://www.instagram.com/drarhayffa.pediatra",      niche: "Medicine"    },
+  { id: 77, handle: "@dra.andrea.damasceno",     url: "https://www.instagram.com/dra.andrea.damasceno",     niche: "Medicine"    },
+  { id: 78, handle: "@dramarinarossato",         url: "https://www.instagram.com/dramarinarossato",         niche: "Medicine"    },
+  { id: 79, handle: "@drasandranaufal",          url: "https://www.instagram.com/drasandranaufal",          niche: "Medicine"    },
+  { id: 80, handle: "@dra.izabelladalbuquerque", url: "https://www.instagram.com/dra.izabelladalbuquerque", niche: "Medicine"    },
+  { id: 81, handle: "@draalicebertelli",         url: "https://www.instagram.com/draalicebertelli",         niche: "Medicine"    },
 ];
 
-// ── Removed IDs ───────────────────────────────────────────────────────────────
-function loadRemoved() {
-  try { return JSON.parse(localStorage.getItem(REMOVED_KEY)) || []; }
-  catch { return []; }
+// ── State ─────────────────────────────────────────────────────────────────────
+let statuses = {};
+let history  = {};
+let removedIds = new Set();
+let profiles = [];
+let selected = new Set();
+let visibleIds = [];
+let chartDays = 30;
+let saveTimer = null;
+
+// ── Sync status UI ────────────────────────────────────────────────────────────
+function setSyncStatus(state, text) {
+  const dot = document.getElementById('syncDot');
+  const txt = document.getElementById('syncText');
+  dot.className = 'sync-dot' + (state ? ' ' + state : '');
+  txt.textContent = text;
 }
-function saveRemoved(arr) { localStorage.setItem(REMOVED_KEY, JSON.stringify(arr)); }
 
-let removedIds = new Set(loadRemoved());
-let profiles = ALL_PROFILES.filter(p => !removedIds.has(p.id));
-
-// ── Status storage ────────────────────────────────────────────────────────────
-function loadStatuses() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
-  catch { return {}; }
+// ── API calls ─────────────────────────────────────────────────────────────────
+async function loadFromSheets() {
+  setSyncStatus('syncing', 'Carregando...');
+  try {
+    const res = await fetch(API_URL + '?action=load');
+    const data = await res.json();
+    statuses   = data.statuses  || {};
+    history    = data.history   || {};
+    removedIds = new Set(data.removed || []);
+    profiles   = ALL_PROFILES.filter(p => !removedIds.has(p.id));
+    setSyncStatus('ok', 'Sincronizado · ' + timeNow());
+    return true;
+  } catch (e) {
+    setSyncStatus('error', 'Erro ao carregar — usando cache local');
+    loadFromLocal();
+    return false;
+  }
 }
-function saveStatuses(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
 
-// ── History storage ({[id]: {[status]: 'YYYY-MM-DD'}}) ───────────────────────
-function loadHistory() {
-  try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || {}; }
-  catch { return {}; }
+async function saveToSheets() {
+  setSyncStatus('syncing', 'Salvando...');
+  // Also persist locally as backup
+  saveToLocal();
+  try {
+    await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'save',
+        statuses,
+        history,
+        removed: [...removedIds]
+      })
+    });
+    setSyncStatus('ok', 'Salvo · ' + timeNow());
+  } catch (e) {
+    setSyncStatus('error', 'Erro ao salvar — dados salvos localmente');
+  }
 }
-function saveHistory(h) { localStorage.setItem(HISTORY_KEY, JSON.stringify(h)); }
 
+function scheduleSave() {
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => saveToSheets(), 800);
+}
+
+async function syncNow() {
+  await loadFromSheets();
+  render();
+}
+
+// ── Local storage fallback ────────────────────────────────────────────────────
+const LS_STATUSES = 'prospect_statuses';
+const LS_HISTORY  = 'prospect_history';
+const LS_REMOVED  = 'prospect_removed';
+
+function saveToLocal() {
+  try {
+    localStorage.setItem(LS_STATUSES, JSON.stringify(statuses));
+    localStorage.setItem(LS_HISTORY,  JSON.stringify(history));
+    localStorage.setItem(LS_REMOVED,  JSON.stringify([...removedIds]));
+  } catch {}
+}
+
+function loadFromLocal() {
+  try { statuses   = JSON.parse(localStorage.getItem(LS_STATUSES)) || {}; } catch { statuses = {}; }
+  try { history    = JSON.parse(localStorage.getItem(LS_HISTORY))  || {}; } catch { history  = {}; }
+  try { removedIds = new Set(JSON.parse(localStorage.getItem(LS_REMOVED)) || []); } catch { removedIds = new Set(); }
+  profiles = ALL_PROFILES.filter(p => !removedIds.has(p.id));
+}
+
+function timeNow() {
+  const d = new Date();
+  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function todayISO() {
   const d = new Date();
   return d.getFullYear() + '-' +
-    String(d.getMonth() + 1).padStart(2, '0') + '-' +
-    String(d.getDate()).padStart(2, '0');
+    String(d.getMonth()+1).padStart(2,'0') + '-' +
+    String(d.getDate()).padStart(2,'0');
 }
-
-// Migrate: remove "Seguiu de volta" (old index 2); remap 3→2, 4→3, 5→4, 6→5, 7→6
-(function migrateRemoveStage2() {
-  const s = loadStatuses();
-  const h = loadHistory();
-  let changed = false;
-  Object.keys(s).forEach(id => {
-    const v = s[id];
-    if (v === 2) { s[id] = 1; changed = true; }
-    else if (v >= 3) { s[id] = v - 1; changed = true; }
-  });
-  Object.keys(h).forEach(id => {
-    const entry = h[id];
-    const newEntry = {};
-    let entryChanged = false;
-    Object.keys(entry).forEach(k => {
-      const ki = parseInt(k);
-      if (ki === 2) { if (!newEntry[1]) newEntry[1] = entry[k]; entryChanged = true; }
-      else if (ki >= 3) { newEntry[ki - 1] = entry[k]; entryChanged = true; }
-      else { newEntry[k] = entry[k]; }
-    });
-    if (entryChanged) { h[id] = newEntry; changed = true; }
-  });
-  if (changed) { saveStatuses(s); saveHistory(h); }
-})();
-
-let statuses = loadStatuses();
 
 function getStatus(id) { return statuses[id] !== undefined ? statuses[id] : 0; }
 
 function advanceStatus(id) {
   const next = (getStatus(id) + 1) % STAGES.length;
   statuses[id] = next;
-  saveStatuses(statuses);
-  const history = loadHistory();
   if (next === 0) {
     delete history[id];
-  } else if (!history[id]) {
-    history[id] = { [next]: todayISO() };
-  } else if (!history[id][next]) {
-    history[id][next] = todayISO();
+  } else {
+    if (!history[id]) history[id] = {};
+    if (!history[id][next]) history[id][next] = todayISO();
   }
-  saveHistory(history);
+  scheduleSave();
   render();
 }
 
 // ── Selection ─────────────────────────────────────────────────────────────────
-let selected = new Set();
-let visibleIds = [];
-
 function toggleSelect(id) {
-  if (selected.has(id)) selected.delete(id);
-  else selected.add(id);
+  if (selected.has(id)) selected.delete(id); else selected.add(id);
   updateBulkBar();
-  // sync select-all checkbox
   const allChecked = visibleIds.length > 0 && visibleIds.every(i => selected.has(i));
   const sa = document.getElementById('selectAll');
   if (sa) sa.checked = allChecked;
@@ -520,20 +609,15 @@ function toggleSelect(id) {
 function toggleSelectAll(checked) {
   if (checked) visibleIds.forEach(i => selected.add(i));
   else visibleIds.forEach(i => selected.delete(i));
-  // re-render just the checkboxes without full table rebuild
-  document.querySelectorAll('tbody input[type="checkbox"]').forEach(cb => {
-    cb.checked = checked;
-  });
+  document.querySelectorAll('tbody input[type="checkbox"]').forEach(cb => { cb.checked = checked; });
   updateBulkBar();
 }
 
 function updateBulkBar() {
   const n = selected.size;
-  document.getElementById('selectedCount').textContent =
-    n === 0 ? '' : `${n} selecionado${n !== 1 ? 's' : ''}`;
-  const hasSelection = n > 0;
+  document.getElementById('selectedCount').textContent = n === 0 ? '' : `${n} selecionado${n !== 1 ? 's' : ''}`;
   const hasAction = document.getElementById('bulkAction').value !== '';
-  document.getElementById('btnApply').disabled = !(hasSelection && hasAction);
+  document.getElementById('btnApply').disabled = !(n > 0 && hasAction);
 }
 
 document.getElementById('bulkAction').addEventListener('change', updateBulkBar);
@@ -548,19 +632,16 @@ function applyBulkAction() {
 }
 
 function bulkSetStatus(newStatus) {
-  const history = loadHistory();
   const today = todayISO();
   [...selected].forEach(id => {
     statuses[id] = newStatus;
-    if (newStatus === 0) {
-      delete history[id];
-    } else {
+    if (newStatus === 0) { delete history[id]; }
+    else {
       if (!history[id]) history[id] = {};
       if (!history[id][newStatus]) history[id][newStatus] = today;
     }
   });
-  saveStatuses(statuses);
-  saveHistory(history);
+  scheduleSave();
   document.getElementById('bulkAction').value = '';
   updateBulkBar();
   render();
@@ -568,10 +649,7 @@ function bulkSetStatus(newStatus) {
 
 function doOpenProfiles() {
   const toOpen = profiles.filter(p => selected.has(p.id));
-  // Browsers block simultaneous window.open — stagger by 120ms per tab
-  toOpen.forEach((p, i) => {
-    setTimeout(() => window.open(p.url, '_blank', 'noopener'), i * 120);
-  });
+  toOpen.forEach((p, i) => { setTimeout(() => window.open(p.url, '_blank', 'noopener'), i * 120); });
 }
 
 function showRemoveModal() {
@@ -582,30 +660,23 @@ function showRemoveModal() {
   document.getElementById('modalOverlay').classList.add('open');
 }
 
-function hideModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-}
+function hideModal() { document.getElementById('modalOverlay').classList.remove('open'); }
 
 function confirmRemove() {
   const toRemove = [...selected];
-  toRemove.forEach(id => removedIds.add(id));
-  saveRemoved([...removedIds]);
-
-  const s = loadStatuses();
-  const h = loadHistory();
-  toRemove.forEach(id => { delete s[id]; delete h[id]; });
-  saveStatuses(s);
-  saveHistory(h);
-
+  toRemove.forEach(id => {
+    removedIds.add(id);
+    delete statuses[id];
+    delete history[id];
+  });
   profiles = ALL_PROFILES.filter(p => !removedIds.has(p.id));
   selected.clear();
   hideModal();
+  scheduleSave();
   render();
 }
 
-// ── Chart range ───────────────────────────────────────────────────────────────
-let chartDays = 30;
-
+// ── Chart ─────────────────────────────────────────────────────────────────────
 function setPreset(days) {
   chartDays = days;
   document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
@@ -613,27 +684,21 @@ function setPreset(days) {
   renderChart();
 }
 
-// ── Chart ─────────────────────────────────────────────────────────────────────
 function buildDays(n) {
   const days = [];
   const now = new Date();
   for (let i = n - 1; i >= 0; i--) {
     const d = new Date(now);
     d.setDate(d.getDate() - i);
-    const iso = d.getFullYear() + '-' +
-      String(d.getMonth() + 1).padStart(2, '0') + '-' +
-      String(d.getDate()).padStart(2, '0');
-    const label = String(d.getDate()).padStart(2, '0') + '/' +
-      String(d.getMonth() + 1).padStart(2, '0');
+    const iso = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    const label = String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0');
     days.push({ iso, label });
   }
   return days;
 }
 
 function renderChart() {
-  const history = loadHistory();
   const days = buildDays(chartDays);
-
   document.getElementById('chartTitle').textContent = `Atividade — últimos ${chartDays} dias`;
 
   const data = days.map(({ iso, label }) => {
@@ -647,27 +712,21 @@ function renderChart() {
 
   const W = 900, H = 170;
   const mL = 28, mR = 12, mT = 8, mB = 32;
-  const cW = W - mL - mR;
-  const cH = H - mT - mB;
-
+  const cW = W - mL - mR, cH = H - mT - mB;
   const maxVal = Math.max(1, ...data.flatMap(d => SERIES.map(s => d[s.key])));
-
-  const n = data.length;
-  const ns = SERIES.length;
+  const n = data.length, ns = SERIES.length;
   const groupW = cW / n;
   const barGap = 1.5;
   const barW = Math.max(2, Math.min(8, (groupW - 10) / ns));
   const groupTotal = ns * barW + (ns - 1) * barGap;
-
   const gridLines = Math.min(maxVal, 4);
+
   let grid = '';
   for (let i = 0; i <= gridLines; i++) {
     const y = mT + cH * (1 - i / gridLines);
     const val = Math.round(maxVal * i / gridLines);
-    grid += `<line x1="${mL}" y1="${y.toFixed(1)}" x2="${W - mR}" y2="${y.toFixed(1)}"
-      stroke="${i === 0 ? '#2a2a2a' : '#1e1e1e'}" stroke-width="1"/>`;
-    grid += `<text x="${mL - 5}" y="${(y + 3.5).toFixed(1)}" text-anchor="end"
-      font-size="9" fill="#444">${val}</text>`;
+    grid += `<line x1="${mL}" y1="${y.toFixed(1)}" x2="${W - mR}" y2="${y.toFixed(1)}" stroke="${i === 0 ? '#2a2a2a' : '#1e1e1e'}" stroke-width="1"/>`;
+    grid += `<text x="${mL - 5}" y="${(y + 3.5).toFixed(1)}" text-anchor="end" font-size="9" fill="#444">${val}</text>`;
   }
 
   let bars = '';
@@ -678,22 +737,17 @@ function renderChart() {
       const bH = val === 0 ? 0 : Math.max(2, (val / maxVal) * cH);
       const x = gx + j * (barW + barGap);
       const y = mT + cH - bH;
-      bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}"
-        width="${barW.toFixed(1)}" height="${bH.toFixed(1)}"
-        fill="${s.color}" rx="1.5"/>`;
+      bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${bH.toFixed(1)}" fill="${s.color}" rx="1.5"/>`;
     });
     const lx = mL + i * groupW + groupW / 2;
-    const ly = mT + cH + 18;
-    bars += `<text x="${lx.toFixed(1)}" y="${ly}"
-      text-anchor="middle" font-size="9" fill="#555">${d.label}</text>`;
+    bars += `<text x="${lx.toFixed(1)}" y="${mT + cH + 18}" text-anchor="middle" font-size="9" fill="#555">${d.label}</text>`;
   });
 
   document.getElementById('chart').innerHTML =
-    `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
-      style="width:100%;display:block;">${grid}${bars}</svg>`;
+    `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">${grid}${bars}</svg>`;
 }
 
-// ── Metric cards ──────────────────────────────────────────────────────────────
+// ── Cards ─────────────────────────────────────────────────────────────────────
 function getCounts() {
   const c = Array(STAGES.length).fill(0);
   profiles.forEach(p => c[getStatus(p.id)]++);
@@ -727,7 +781,6 @@ function render() {
   });
 
   visibleIds = filtered.map(p => p.id);
-
   const tbody = document.getElementById('tbody');
   tbody.innerHTML = filtered.length === 0
     ? `<tr><td colspan="5" class="empty">Nenhum resultado</td></tr>`
@@ -754,14 +807,17 @@ function render() {
 
 document.getElementById('search').addEventListener('input', render);
 document.getElementById('statusFilter').addEventListener('change', render);
-
-// Close modal on overlay click
 document.getElementById('modalOverlay').addEventListener('click', function(e) {
   if (e.target === this) hideModal();
 });
 
-
-render();
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async function init() {
+  const overlay = document.getElementById('loadingOverlay');
+  await loadFromSheets();
+  render();
+  overlay.classList.add('hidden');
+})();
 </script>
 </body>
 </html>
